@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="orllewin.rad">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+
+    <application
+        android:name=".RadApp"
+        android:allowBackup="true"
+        android:icon="@drawable/vector_app_icon"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/vector_app_icon"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RAD">
+        <activity
+            android:name=".RadComposeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.RAD">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".RadService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <service android:name=".androidauto.StationsMediaBrowser"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+
+        <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/automotive_app_desc"/>
+        <meta-data android:name="com.google.android.gms.car.notification.SmallIcon" android:resource="@drawable/vector_app_icon" />
+
+        <provider android:name=".androidauto.StationLogoProvider"
+            android:authorities="${applicationId}.artwork_provider"
+            android:exported="true">
+        </provider>
+
+
+
+
+    </application>
+
+</manifest>

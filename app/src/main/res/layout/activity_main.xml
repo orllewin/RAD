@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    tools:ignore="PxUsage">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/radImage16x16"
+        android:layout_width="16px"
+        android:layout_height="16px" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/radImageCircle256x256"
+        android:layout_width="256px"
+        android:layout_height="256px" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/radImageSquare256x256"
+        android:layout_width="256px"
+        android:layout_height="256px" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>
