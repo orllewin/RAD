@@ -30,7 +30,7 @@ class RadService: Service() {
 
     companion object{
 
-        fun getIntent(context: Context, radStation: StationEntity):Intent{
+        fun getIntent(context: Context, radStation: Station):Intent{
             return Intent(context, RadService::class.java).also { intent ->
                 intent.putExtra("action", START_RAD_SERVICE)
                 intent.putExtra("title", radStation.title)

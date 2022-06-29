@@ -57,6 +57,8 @@ class StationsMediaBrowser: MediaBrowserServiceCompat() {
 
     var stationsSession: MediaSessionCompat? = null
 
+    var streamStart = 0L
+    var pauseStart = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -68,17 +70,31 @@ class StationsMediaBrowser: MediaBrowserServiceCompat() {
 
                 override fun onStop() {
                     super.onStop()
-                    //todo
+                    setPlaybackState(
+                        PlaybackStateCompat.Builder()
+                            .setState(PlaybackStateCompat.STATE_PAUSED, 0, 1.0f)
+                            .setActions(PlaybackStateCompat.ACTION_PLAY).build())
+                    exoPlayer.pause()
                 }
 
                 override fun onPause() {
                     super.onPause()
-                    //todo
+                    setPlaybackState(
+                        PlaybackStateCompat.Builder()
+                            .setState(PlaybackStateCompat.STATE_PAUSED, exoPlayer.contentPosition, 1.0f)
+                            .setActions(PlaybackStateCompat.ACTION_PLAY).build())
+                    exoPlayer.pause()
+                    pauseStart = System.currentTimeMillis()
                 }
 
                 override fun onPlay() {
                     super.onPlay()
-                    //todo
+
+                    setPlaybackState(
+                        PlaybackStateCompat.Builder()
+                            .setState(PlaybackStateCompat.STATE_PLAYING, exoPlayer.contentPosition, 1.0f)
+                            .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE).build())
+                    exoPlayer.play()
                 }
 
                 override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
@@ -93,8 +109,11 @@ class StationsMediaBrowser: MediaBrowserServiceCompat() {
                         stationsSession?.setMetadata(useCase.getMetadata(mediaId))
                         stationsSession?.controller?.transportControls?.play()
 
+                        streamStart = System.currentTimeMillis()
+
                         setPlaybackState(
-                            PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                            PlaybackStateCompat.Builder()
+                                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
                                 .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE).build())
 
                         exoPlayer.prepare()
@@ -107,23 +126,6 @@ class StationsMediaBrowser: MediaBrowserServiceCompat() {
         sessionToken = stationsSession?.sessionToken
     }
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
-//        return when(clientPackageName) {
-//            "com.google.android.projection.gearhead" -> {
-//
-//            }
-//            else -> {
-//                BrowserRoot("root", null)
-//            }
-//        }
-
-        //This will generally be 4 - 4 root tabs/categories
-        val maximumRootChildLimit =
-            rootHints?.getInt(MediaConstants.BROWSER_ROOT_HINTS_KEY_ROOT_CHILDREN_LIMIT, 4)
-        val supportedRootChildFlags = rootHints?.getInt(
-            MediaConstants.BROWSER_ROOT_HINTS_KEY_ROOT_CHILDREN_SUPPORTED_FLAGS,
-            MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
-        )
-
         val extras = Bundle()
 
         //Request grid for every type - browsable and playable:

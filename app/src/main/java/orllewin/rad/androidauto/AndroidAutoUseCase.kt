@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import orllewin.rad.StationsRepository
 import orllewin.rad.dataStore
-import orllewin.rad.StationEntity
+import orllewin.rad.Station
 
 class AndroidAutoUseCase(val context: Context, val stationsRepository: StationsRepository) {
 
@@ -20,14 +20,14 @@ class AndroidAutoUseCase(val context: Context, val stationsRepository: StationsR
     val localRoot = "network_root"
 
     private val urlPrefKey = stringPreferencesKey("radio_feed_url")
-    private var feedUrl = "https://orllewin.uk/default_stations.json"
+    private var feedUrl = "https://orllewin.uk/orllewin_stations.json"
     private var prefs: Preferences = runBlocking { context.dataStore.data.first() }
 
     private val childMap = HashMap<String, List<MediaBrowserCompat.MediaItem>>()
     private val metadata = mutableListOf<MediaMetadataCompat>()
 
     init {
-        feedUrl = prefs[urlPrefKey] ?: "https://orllewin.uk/default_stations.json"
+        feedUrl = prefs[urlPrefKey] ?: "https://orllewin.uk/orllewin_stations.json"
     }
 
     /**
@@ -97,13 +97,13 @@ class AndroidAutoUseCase(val context: Context, val stationsRepository: StationsR
                 }
                 metadata.clear()
                 metadata.addAll(metadatas)
-                childMap.put(parentMediaId, mediaItems)
+                childMap[parentMediaId] = mediaItems
                 onChildren(parentMediaId, mediaItems)
             }
         }
     }
 
-    private fun artUri(station: StationEntity): String {
+    private fun artUri(station: Station): String {
         return Uri.Builder()
             .scheme(ContentResolver.SCHEME_CONTENT)
             .authority(authority(context))

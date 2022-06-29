@@ -1,5 +1,6 @@
 package orllewin.rad
 
+import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -23,12 +24,13 @@ class StationsRepository @Inject constructor(){
         val website: String?,
         val streamUrl: String?,
         val logoUrl: String?,
-        val radImage: String?
+        val radImage: String?,
+        val colour: String?
     )
 
-    fun getStations(feedUrl: String, onStations: (stations: List<StationEntity>, error: String?) -> Unit) = getRemoteStations(feedUrl, onStations)
+    fun getStations(feedUrl: String, onStations: (stations: List<Station>, error: String?) -> Unit) = getRemoteStations(feedUrl, onStations)
 
-    private fun getRemoteStations(feedUrl: String, onStations: (stations: List<StationEntity>, error: String?) -> Unit){
+    private fun getRemoteStations(feedUrl: String, onStations: (stations: List<Station>, error: String?) -> Unit){
         val request = Request.Builder()
             .url(feedUrl)
             .build()
@@ -42,14 +44,15 @@ class StationsRepository @Inject constructor(){
                     val defaultStation: DefaultStations? = jsonAdapter.fromJson(response.body!!.string())
 
                     defaultStation?.let{
-                        val stationsEntities = mutableListOf<StationEntity>()
+                        val stationsEntities = mutableListOf<Station>()
                         defaultStation.stations?.forEachIndexed { index, stationDto ->
                             stationsEntities.add(
-                                StationEntity(
+                                Station(
                                 title = stationDto.title ?: "",
                                 website = stationDto.website,
                                 streamUrl = stationDto.streamUrl ?: "",
-                                logoUrl = stationDto.logoUrl
+                                logoUrl = stationDto.logoUrl,
+                                colour = getColor(stationDto.colour)
                             )
                             )
                         }
@@ -66,5 +69,10 @@ class StationsRepository @Inject constructor(){
                 onStations(listOf(), e.toString())
             }
         })
+    }
+
+    fun getColor(colorString: String?): Color? {
+        if(colorString == null) return null
+        return Color(android.graphics.Color.parseColor(colorString))
     }
 }

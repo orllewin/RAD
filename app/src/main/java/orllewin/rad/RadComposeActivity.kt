@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -80,12 +82,12 @@ class RadComposeActivity : ComponentActivity() {
         }
     }
 
-    private fun playStation(radPlayable: StationEntity) {
+    private fun playStation(radPlayable: Station) {
         println("RAD: playstation: ${radPlayable.title}")
         startService(RadService.getIntent(this, radPlayable))
     }
 
-    private fun stop(){
+    private fun stop() {
         println("RAD: stop()")
         startService(RadService.getStopIntent(this))
     }
@@ -95,7 +97,7 @@ class RadComposeActivity : ComponentActivity() {
     fun RadScreen(viewModel: RadViewModel, navController: NavController) {
         val coroutineScope = rememberCoroutineScope()
         var showMenu by remember { mutableStateOf(false) }
-        var selectedStation by remember { mutableStateOf<StationEntity?>(null) }
+        var selectedStation by remember { mutableStateOf<Station?>(null) }
         var bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
         )
@@ -148,47 +150,64 @@ class RadComposeActivity : ComponentActivity() {
                         )
                     },
                     content = {
-                            LazyVerticalGrid(
-                                cells = GridCells.Fixed(3),
-                                state = rememberLazyListState(),
-                                contentPadding = PaddingValues(10.dp)
-                            ) {
-                                items(viewModel.uiState.stations.size) { index ->
-                                    val station = viewModel.uiState.stations[index]
-                                    Card(
-                                        shape = RoundedCornerShape(4.dp),
-                                        modifier = Modifier
-                                            .padding(4.dp)
-                                            .fillMaxWidth()
-                                            .height(180.dp)
-                                            .clickable {
-                                                selectedStation = station
-                                                playStation(selectedStation!!)
-                                                coroutineScope.launch {
-                                                    bottomSheetScaffoldState.bottomSheetState.expand()
-                                                }
-                                            },
-                                        backgroundColor = MaterialTheme.colors.surface,
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                        ) {
-                                            if (station.hasLogoUrl()) {
-                                                RemoteLogo().RemoteLogoFill(
-                                                    station.logoUrl!!,
-                                                    station.title
-                                                )
-                                            } else {
-                                                Text(
-                                                    text = station.title,
-                                                    fontSize = 20.sp,
-                                                    modifier = Modifier.padding(start = 0.dp)
-                                                )
+                        LazyVerticalGrid(
+                            cells = GridCells.Fixed(3),
+                            state = rememberLazyListState(),
+                            contentPadding = PaddingValues(10.dp)
+                        ) {
+                            items(viewModel.uiState.stations.size) { index ->
+                                val station = viewModel.uiState.stations[index]
+                                Card(
+                                    shape = RoundedCornerShape(4.dp),
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .clickable {
+                                            selectedStation = station
+                                            playStation(selectedStation!!)
+                                            coroutineScope.launch {
+                                                bottomSheetScaffoldState.bottomSheetState.expand()
                                             }
+                                        },
+                                    backgroundColor = station.colour
+                                        ?: MaterialTheme.colors.surface,
+                                ) {
+
+
+                                    Box(
+                                        contentAlignment = Alignment.BottomStart,
+                                        modifier = Modifier
+                                            .padding(start = 12.dp, bottom = 6.dp)
+                                            .fillMaxHeight()
+                                    ) {
+
+                                        Column {
+                                            if (station.hasLogoUrl()) {
+                                                Box(
+                                                    contentAlignment = Alignment.TopStart,
+                                                    modifier = Modifier.padding(bottom = 6.dp)
+                                                ) {
+                                                    RemoteLogo().RemoteLogoRound(
+                                                        station.logoUrl!!,
+                                                        station.title,
+                                                        40.dp
+                                                    )
+                                                }
+                                            }
+                                            Text(
+                                                text = station.title,
+                                                style = TextStyle(fontWeight = FontWeight.Medium),
+                                                fontSize = 16.sp,
+                                                color = Color.Black,
+                                                modifier = Modifier.padding(start = 0.dp)
+                                            )
                                         }
+
                                     }
                                 }
                             }
+                        }
                     },
                     scaffoldState = bottomSheetScaffoldState,
                     //Bottom Sheet
@@ -203,7 +222,7 @@ class RadComposeActivity : ComponentActivity() {
                                     RemoteLogo().RemoteLogo(
                                         selectedStation!!.logoUrl,
                                         selectedStation!!.title
-                                    ){
+                                    ) {
                                         uriHandler.openUri(selectedStation!!.website!!)
                                     }
                                     Column(
@@ -213,7 +232,7 @@ class RadComposeActivity : ComponentActivity() {
                                         Button(
                                             onClick = {
                                                 stop()
-                                                coroutineScope.launch{
+                                                coroutineScope.launch {
                                                     bottomSheetScaffoldState.bottomSheetState.collapse()
                                                 }
 
@@ -307,7 +326,7 @@ class RadComposeActivity : ComponentActivity() {
                                                 when {
                                                     url.isBlank() -> toast("Enter station feed Url")
                                                     !url.startsWith("https://") -> toast("Stations feed Url must start with https://")
-                                                    else ->{
+                                                    else -> {
                                                         coroutineScope.launch {
                                                             context.dataStore.edit { mPrefs ->
                                                                 mPrefs[urlPrefKey] = url
@@ -319,7 +338,7 @@ class RadComposeActivity : ComponentActivity() {
                                                     }
                                                 }
                                             }
-                                        ){
+                                        ) {
                                             Icon(
                                                 Icons.Filled.Done,
                                                 contentDescription = "Save",
@@ -349,5 +368,6 @@ class RadComposeActivity : ComponentActivity() {
         )
     }
 
-    fun toast(message: String) = Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+    fun toast(message: String) =
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
 }
